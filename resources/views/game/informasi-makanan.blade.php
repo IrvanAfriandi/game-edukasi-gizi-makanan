@@ -12,12 +12,34 @@
                     <p class="text-center fw-bold mb-5" style="color: rgb(0, 140, 0); font-size: clamp(4rem, 15vw, 10rem);">{{ $score }}</p>
                 @endif
                 @if (count($selectedFoods))
+                    @if (!empty($feedback))
+                        <section class="card border-0 shadow-sm text-start mx-auto mb-5" style="max-width: 850px;" aria-labelledby="score-feedback-heading">
+                            <div class="card-body p-4">
+                                <h2 id="score-feedback-heading" class="h3 mb-3">Kenapa kamu mendapat skor ini?</h2>
+                                <ul class="mb-4">
+                                    @foreach ($feedback as $message)
+                                        <li class="mb-2">{{ $message }}</li>
+                                    @endforeach
+                                </ul>
+                                @if ($scoreBreakdown)
+                                    <div class="d-flex flex-wrap gap-2 align-items-center border-top pt-3">
+                                        <span class="badge bg-success">Poin makanan: +{{ $scoreBreakdown['foodPoints'] }}</span>
+                                        @if ($scoreBreakdown['diversityBonus'] > 0)
+                                            <span class="badge bg-primary">Bonus keragaman kategori: +{{ $scoreBreakdown['diversityBonus'] }}</span>
+                                        @endif
+                                        <span class="fw-bold">Total: {{ $score }}</span>
+                                    </div>
+                                    <p class="small text-muted mb-0 mt-2">Setiap pilihan memberi 10 poin. Setiap kategori berbeda setelah kategori pertama memberi bonus 30 poin. Skor maksimal 100.</p>
+                                @endif
+                            </div>
+                        </section>
+                    @endif
                     <h2 class="h3 mb-4">Makanan yang kamu pilih</h2>
                     <div class="row g-4 justify-content-center mb-5">
                         @foreach ($selectedFoods as $food)
                             <div class="col-6 col-md-3">
                                 <div class="card h-100 shadow-sm">
-                                    <img src="{{ asset($food['image']) }}" class="card-img-top p-3" alt="{{ $food['name'] }}" style="height: 160px; object-fit: contain;">
+                                    <img src="{{ asset('src/img/'.$food['image']) }}" class="card-img-top p-3" alt="{{ $food['name'] }}" style="height: 160px; object-fit: contain;">
                                     <div class="card-body">
                                         <h3 class="h5 card-title">{{ $food['name'] }}</h3>
                                         <p class="card-text">{{ $food['category'] }}</p>

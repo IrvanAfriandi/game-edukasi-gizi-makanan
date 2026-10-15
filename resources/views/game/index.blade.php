@@ -3,6 +3,9 @@
 @section("content")
 <div class="container-fluid faq-section bg-light py-5" style="min-height: 600px; background-image: url('{{ asset('src/img/bgn.png') }}'); background-size: cover; background-position: center;">
     <div class="container py-5">
+        @if (session('error'))
+            <div class="alert alert-warning text-center" role="alert">{{ session('error') }}</div>
+        @endif
         <div class="row g-5 align-items-center">
             <div class="col-xl-6 wow fadeInRight" data-wow-delay="0.4s" style="position: relative;">
                 <img src="{{ asset('src/img/piring.png')}}" class="img-fluid w-100" alt="" style="position: relative; z-index: 1;">
@@ -24,9 +27,11 @@
                     </div>
                     <div class="accordion d-flex flex-column align-items-center">
                         <div class="menu-buttons d-flex gap-3 mb-4">
-                            <button class="menu-btn" onclick="showPopup('Protein')">Protein</button>
-                            <button class="menu-btn" onclick="showPopup('Vitamin A')">Vitamin A</button>
-                            <button class="menu-btn" onclick="showPopup('Vitamin C')">Vitamin C</button>
+                            @foreach ($foods as $category => $categoryFoods)
+                                <button class="menu-btn" type="button" onclick="showPopup(@js($category))">
+                                    {{ $category }} <span class="small">({{ count($categoryFoods) }} pilihan)</span>
+                                </button>
+                            @endforeach
                         </div>
                         <div class="action-buttons d-flex gap-3 mt-4">
                             <button id="submitMenu" class="action-btn">Selesai</button>
@@ -48,10 +53,35 @@
 <script>
     const maxSelections = 4;
     const foods = @json($foods);
-    const assetBase = @json(asset(''));
+    const assetBase = @json(asset('src/img'));
     const submitUrl = @json(route('submit.menu'));
     const resultUrl = @json(route('informasi-makanan'));
     let selectedFoods = [];
+
+    function foodImageUrl(image) {
+        return `${assetBase}/${image}`;
+    }
+
+    function createFoodImage(image, alt) {
+        const element = document.createElement('img');
+        element.src = foodImageUrl(image);
+        element.alt = alt;
+        element.style.width = '100px';
+        element.style.height = '100px';
+        element.style.objectFit = 'contain';
+        element.addEventListener('error', () => {
+            const placeholder = document.createElement('span');
+            placeholder.className = 'd-flex align-items-center justify-content-center text-center p-2 bg-light rounded';
+            placeholder.textContent = 'Gambar segera ditambahkan';
+            placeholder.setAttribute('role', 'img');
+            placeholder.setAttribute('aria-label', `Gambar ${alt} belum tersedia`);
+            placeholder.style.width = '100px';
+            placeholder.style.height = '100px';
+            placeholder.style.fontSize = '0.8rem';
+            element.replaceWith(placeholder);
+        }, { once: true });
+        return element;
+    }
 
     function showPopup(category) {
         Swal.fire({
@@ -71,18 +101,14 @@
 
                 categoryFoods.forEach(food => {
                     const button = document.createElement('button');
-                    const image = document.createElement('img');
                     const name = document.createElement('span');
 
                     button.type = 'button';
                     button.className = 'btn btn-light d-flex flex-column align-items-center';
-                    image.src = `${assetBase}${food.image}`;
-                    image.alt = food.name;
-                    image.style.maxWidth = '100px';
-                    image.style.maxHeight = '100px';
+                    button.setAttribute('aria-label', `Pilih ${food.name}`);
                     name.textContent = food.name;
 
-                    button.append(image, name);
+                    button.append(createFoodImage(food.image, food.name), name);
                     button.addEventListener('click', () => selectFood(food.id, food.image));
                     container.append(button);
                 });
@@ -100,11 +126,7 @@
 
                 const boxIndex = selectedFoods.length;
                 const box = document.getElementById(`box${boxIndex}`);
-                box.innerHTML = `
-                    <div style="position: relative; width: 100%; height: 100%;">
-                        <img src="${assetBase}${foodImage}" alt="Makanan pilihan ${boxIndex}" style="max-width: 100%; max-height: 100%;">
-                    </div>
-                `;
+                box.replaceChildren(createFoodImage(foodImage, `Makanan pilihan ${boxIndex}`));
 
                 Swal.close();
             } else {
@@ -156,7 +178,7 @@
     function resetMenu() {
         selectedFoods = [];
         for (let i = 1; i <= maxSelections; i++) {
-            document.getElementById(`box${i}`).innerHTML = '';
+            document.getElementById(`box${i}`).replaceChildren();
         }
 
     }
