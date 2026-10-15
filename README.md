@@ -113,15 +113,6 @@ Skor 100 tercapai jika empat makanan yang dipilih mencakup ketiga kategori. Skor
 
 7. Buka alamat yang ditampilkan, biasanya <http://127.0.0.1:8000>.
 
-### Gambar makanan
-
-Beberapa gambar masih menunggu untuk ditambahkan. Aplikasi akan menampilkan placeholder sampai file berikut tersedia di `public/src/img/`:
-
-- `tempe.png`
-- `tahu.png`
-- `kacang_hijau.png`
-- `ubi_jalar.png`
-- `jambu_biji.png`
 
 ## Menjalankan tes
 
